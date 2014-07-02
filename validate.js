@@ -1,26 +1,46 @@
 var fs = require('fs');
-
 var JSV = require('JSV').JSV;
 
-var allSchema = JSON.parse(fs.readFileSync('tincan.schema.json', 'utf8'));
-
-var json = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 
 var env = JSV.createEnvironment("json-schema-draft-03");
+var schemaschema = env.findSchema("http://json-schema.org/draft-03/schema");
 
+var allSchema = JSON.parse(fs.readFileSync(__dirname + '/tincan.schema.json', 'utf8'));
 var schema = env.createSchema(allSchema, null, 'tcapi:special');
 
-var schemaschema = env.findSchema("http://json-schema.org/draft-03/schema");
-var schemareport = schemaschema.validate(schema);
+function validateSchema(schema) {
+    var schemareport = schemaschema.validate(schema);
+    if (schemareport.errors.length > 0) return schemareport;
+    return null;
+}
 
-if(schemareport.errors.length > 0) {
-    console.log("Problems with schema!");
-    console.log(schemareport.errors);
+function validate(json) {
+    //validate a single statement or list of statements
+    var report = env.validate(json, {"$ref": "tcapi:special#statementpost"});
+    if (report.errors.length > 0) return report;
+    return null;
 }
 
 
-//validate a single statement or list of statements
-var report = env.validate(json, {"$ref": "tcapi:special#statementpost"});
+if (!process.argv[2]) {
+    throw new Error(
+        "No input file! Syntax:\n" +
+        "    " + process.argv[1] + " <json file>\n"
+    );
+}
+
+var schemaErrors = validateSchema(schema);
+if (schemaErrors) {
+    throw new Error(
+        "Could not load schema:\n" +
+        "    " + JSON.stringify(schemaErrors.errors, null, "    ") + "\n"
+    );
+}
+
+console.log("Loading  " + process.argv[2] + " ...");
+var json = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+console.log("Validating...");
+var report = validate(json);
 
 //TODO: validate length of mbox_sha1sum
 //TODO: language map keys -- really funky rules!
@@ -31,11 +51,12 @@ var report = env.validate(json, {"$ref": "tcapi:special#statementpost"});
 //TODO: find out why minItems and maxItems aren't validating
 
 
-
-console.log("Done validating!");
-if (report.errors.length > 0) {
-    console.log("Errors!");
-    console.log(report.errors);
+console.log("Done.");
+if (report) {
+    throw new Error(
+        "Validation failed:\n" +
+        JSON.stringify(report.errors, null, "    ") + "\n"
+    );
 } else {
     console.log("No errors!");
 }

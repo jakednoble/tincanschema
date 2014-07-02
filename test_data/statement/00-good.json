@@ -8,7 +8,7 @@
          "display": {"en-US": "experienced"}
          },
      "object": {
-"id": "http://example.com/activities/solo-hang-gliding",
+        "id": "http://example.com/activities/solo-hang-gliding",
         "definition": {
             "name": { "en-US": "Solo Hang Gliding" }
         }

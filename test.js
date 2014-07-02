@@ -3,17 +3,16 @@ var schemaUtils = require('./schemaUtils.js');
 
 
 var dstPath = __dirname + '/schema';
+var allSchemaPath = __dirname + '/tincan.schema.json';
 // var allSchema = JSON.parse(fs.readFileSync(__dirname + '/tincan.schema.json', 'utf8'));
 var allSchema = null;
 function loadAllSchema(callback) {
-    schemaUtils.loadSchema(__dirname + '/tincan.schema.json',
-        function(err, data) {
-            if (err) { callback(err); return; }
+    schemaUtils.loadSchema(allSchemaPath, function(err, data) {
+        if (err) { callback(err); return; }
 
-            allSchema = data;
-            callback();
-        }
-    );
+        allSchema = data;
+        callback();
+    });
 }
 
 
@@ -55,7 +54,7 @@ function objectsEqual(x, y) {
 
 
 function test_serializeDeserialize(callback) {
-    schemaUtils.splitSchema(allSchema, dstPath, function(err) {
+    schemaUtils.splitSchemaFile(allSchemaPath, dstPath, function(err) {
         if (err) { callback(err); return; }
 
         var allSchemaResult = schemaUtils.loadSchemaDir(dstPath, function(err, data){

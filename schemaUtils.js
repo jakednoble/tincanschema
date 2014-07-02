@@ -117,6 +117,7 @@ exports.loadSchema = function(srcPath, callback) {
     :param callback: called as callback(err, data) when finished. data
     is an Object containing the schema
      */
+    console.log('Loading ' + srcPath);
     fs.readFile(srcPath, function(err, data) {
         if (err) { callback(err); return; }
 

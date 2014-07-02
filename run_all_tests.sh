@@ -8,7 +8,6 @@ function test_good() {
         echo "OK"
     else
         echo "FAILED"
-        echo "Failed with code $code"
         echo "$msgs"
     fi
 }
@@ -21,7 +20,7 @@ function test_bad() {
         echo "FAILED"
         echo "Unexpected success on $dir/$file !"
         echo "$msgs"
-    elif echo "$msgs" | grep '^Errors!$' >/dev/null; then
+    elif echo "$msgs" | grep '^Error: Validation failed' >/dev/null; then
         echo "OK"
         # echo "$msgs"
     else
