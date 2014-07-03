@@ -43,6 +43,22 @@ exports.validate = function(obj, schema) {
     return null;
 };
 
+function getFolder(path, callback) {
+    fs.stat(path, function(err, stat) {
+        if (err && err.code === 'ENOENT') {
+            var permissions = 0777 & ~process.umask();
+            return fs.mkdir(path, permissions, callback);
+        }
+        else if  (stat && !stat.isDirectory()) {
+            return callback(new Error(
+                "Not a directory:  " + path
+            ));
+        }
+        // else directory exists
+        return callback();
+    });
+}
+
 exports.splitSchema = function(obj, dstPath, callback) {
     /*
     Takes a large schema Object and splits its 'properties' value into
@@ -54,12 +70,21 @@ exports.splitSchema = function(obj, dstPath, callback) {
     schema
     :param callback: called as callback(err) when finished
      */
-    var props = obj.properties;
+    async.auto({
+        check_folder: function(callback) { getFolder(dstPath, callback); },
 
-    async.each(Object.keys(props), function(name, each_callback) {
-        var fpath = dstPath + "/" + name + ".json";
-        exports.writeSchema(props[name], fpath, each_callback);
-    }, callback);
+        write_files: ['check_folder', function(callback) {
+            var props = obj.properties;
+
+            async.each(Object.keys(obj.properties), function(name, callback) {
+                var fpath = dstPath + "/" + name + ".json";
+                exports.writeSchema(props[name], fpath, callback);
+            }, callback);
+        }],
+    }, function(err, results) {
+        return callback(err);
+    });
+
 };
 
 exports.splitSchemaFile = function(srcPath, dstPath, callback) {
@@ -73,7 +98,7 @@ exports.splitSchemaFile = function(srcPath, dstPath, callback) {
     :param callback: called as callback(err) when finished
      */
     exports.loadSchema(srcPath, function(err, data) {
-        if (err) { callback(err); return; }
+        if (err) return callback(err);
 
         exports.splitSchema(data, dstPath, callback);
     });
@@ -90,19 +115,18 @@ exports.writeSchema = function(obj, fpath, callback){
     if (exports.SHOULD_VALIDATE) {
         var errorReport = exports.validateSchema(obj);
         if (errorReport) {
-            callback(new Error(
+            return callback(new Error(
                 'Could not save schema; failed validation\n' +
                 '==== DATA ====\n' +
                 JSON.stringify(obj) +
                 '==== END DATA ====\n' +
                 JSON.stringify(errorReport, null, '    ')));
-            return;
         }
     }
 
     var textData = JSON.stringify(obj, null, "    ");
     fs.writeFile(fpath, textData, {'encoding': 'utf8'}, function(err) {
-        if (err) { callback(err); return; }
+        if (err) return callback(err);
 
         console.log("Wrote file:  " + fpath);
         callback();
@@ -119,20 +143,19 @@ exports.loadSchema = function(srcPath, callback) {
      */
     console.log('Loading ' + srcPath);
     fs.readFile(srcPath, function(err, data) {
-        if (err) { callback(err); return; }
+        if (err) return callback(err);
 
         data = JSON.parse(data);
 
         if (exports.SHOULD_VALIDATE) {
             var errorReport = exports.validateSchema(data);
             if (errorReport) {
-                callback(new Error(
+                return callback(new Error(
                     'Schema in file ' + srcPath + ' failed validation\n' +
                     '==== DATA ====\n' +
                     data + '\n' +
                     '==== END DATA ====\n' +
                     JSON.stringify(errorReport, null, '    ')));
-                return;
             }
         }
         callback(null, data);
@@ -148,7 +171,7 @@ exports.loadSchemaDir = function(srcPath, callback) {
     is an Object containing the schema
      */
     fs.readdir(srcPath, function(err, files) {
-        if (err) { callback(err); return; }
+        if (err) return callback(err);
 
         var jsonFiles = files.filter(function(fname) {
             return fname.endsWith('.json');
@@ -157,7 +180,7 @@ exports.loadSchemaDir = function(srcPath, callback) {
         var props = {};
         async.each(jsonFiles, function(fname, each_callback) {
             exports.loadSchema(srcPath + '/' + fname, function(err, data) {
-                if (err) { each_callback(err); return; }
+                if (err) return each_callback(err);
 
                 var name = fname.split('.')[0];
                 props[name] = data;
@@ -166,7 +189,7 @@ exports.loadSchemaDir = function(srcPath, callback) {
             });
         },
         function(err) {
-            if (err) { callback(err); return; }
+            if (err) return callback(err);
 
             var result = {'properties': props};
             callback(null, result);

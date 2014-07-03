@@ -1,19 +1,6 @@
 var fs = require('fs');
+var async = require('async');
 var schemaUtils = require('./schemaUtils.js');
-
-
-var dstPath = __dirname + '/schema';
-var allSchemaPath = __dirname + '/tincan.schema.json';
-// var allSchema = JSON.parse(fs.readFileSync(__dirname + '/tincan.schema.json', 'utf8'));
-var allSchema = null;
-function loadAllSchema(callback) {
-    schemaUtils.loadSchema(allSchemaPath, function(err, data) {
-        if (err) { callback(err); return; }
-
-        allSchema = data;
-        callback();
-    });
-}
 
 
 // http://stackoverflow.com/a/1144249
@@ -53,34 +40,50 @@ function objectsEqual(x, y) {
 }
 
 
-function test_serializeDeserialize(callback) {
-    schemaUtils.splitSchemaFile(allSchemaPath, dstPath, function(err) {
-        if (err) { callback(err); return; }
+var dstPath = __dirname + '/schema';
+var allSchemaPath = __dirname + '/tincan.schema.json';
+var allSchema = null;
+function loadAllSchema(callback) {
+    schemaUtils.loadSchema(allSchemaPath, function(err, data) {
+        if (err) return callback(err);
 
-        var allSchemaResult = schemaUtils.loadSchemaDir(dstPath, function(err, data){
-            if (err) { callback(err); return; }
+        allSchema = data;
+        callback();
+    });
+}
+
+function test_splitJoin(callback) {
+    schemaUtils.splitSchema(allSchema, dstPath, function(err) {
+        if (err) return callback(err);
+
+        var allSchemaResult = schemaUtils.loadSchemaDir(
+                dstPath,
+                function(err, data){
+            if (err) return callback(err);
 
             if (objectsEqual(data, allSchema)) {
-                console.log("Split and combined schema successfully!");
+                console.log("Split and joined schema successfully!");
             } else {
-                callback(Error(
+                return callback(Error(
                     "Did not get expected result\n" +
                     "==== EXPECTED ====\n" +
-                    expected + "\n" +
+                    JSON.stringify(allSchema, null, '    ') + "\n" +
                     "==== END EXPECTED ====\n" +
                     "==== RESULT ====\n" +
-                    result + "\n" +
+                    JSON.stringify(data, null, '    ') + "\n" +
                     "==== END RESULT ===="
                 ));
-                return;
             }
         });
     });
 }
 
 function main() {
-    loadAllSchema(function(){
-        test_serializeDeserialize(function(){});
+    async.auto({
+        load_all_schema: loadAllSchema,
+        test_split_join: ['load_all_schema', test_splitJoin],
+    }, function(err) {
+        if (err) throw err;
     });
 }
 
