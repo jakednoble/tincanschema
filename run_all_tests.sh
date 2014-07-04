@@ -1,8 +1,10 @@
 #!/bin/bash
 
+node='/usr/local/bin/node'
+
 function test_good() {
     local file="$1"
-    local msgs="`node /Users/chaimleib/tincanschema/validate.js $file 2>&1`"
+    local msgs="`$node /Users/chaimleib/tincanschema/validate.js $file 2>&1`"
     local code=$?
     if echo "$msgs" | grep '^No errors!$' >/dev/null; then
         echo "OK"
@@ -14,7 +16,7 @@ function test_good() {
 
 function test_bad() {
     local file="$1"
-    local msgs="`node /Users/chaimleib/tincanschema/validate.js $file 2>&1`"
+    local msgs="`$node /Users/chaimleib/tincanschema/validate.js $file 2>&1`"
     local code=$?
     if echo "$msgs" | grep '^No errors!$' >/dev/null; then
         echo "FAILED"

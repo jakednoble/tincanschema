@@ -5,7 +5,7 @@ var JSV = require('JSV').JSV;
 
 var env = JSV.createEnvironment("json-schema-draft-03");
 var schemaschema = env.findSchema("http://json-schema.org/draft-03/schema");
-exports.SHOULD_VALIDATE = false;
+exports.SHOULD_VALIDATE = true;
 
 if (typeof String.prototype.endsWith !== 'function') {
     String.prototype.endsWith = function(suffix) {
@@ -13,6 +13,9 @@ if (typeof String.prototype.endsWith !== 'function') {
     };
 }
 
+exports.addSchemaName = function(schema, name) {
+    env.createSchema(schema, null, name);
+}
 
 exports.validateSchema = function(schema) {
     /*
@@ -29,7 +32,7 @@ exports.validateSchema = function(schema) {
     return null;
 };
 
-exports.validate = function(obj, schema) {
+exports.validate = function(obj, id) {
     /*
     Verifies that json is an Object that complies with schema.
 
@@ -38,7 +41,7 @@ exports.validate = function(obj, schema) {
     :returns null if no errors and obj is valid
     :returns an error report Object if not valid
      */
-    var report = env.validate(obj, schema);
+    var report = env.validate(obj, id);
     if (report.errors.length > 0) return report;
     return null;
 };
@@ -141,7 +144,7 @@ exports.loadSchema = function(srcPath, callback) {
     :param callback: called as callback(err, data) when finished. data
     is an Object containing the schema
      */
-    console.log('Loading ' + srcPath);
+    // console.log('Loading ' + srcPath);
     fs.readFile(srcPath, function(err, data) {
         if (err) return callback(err);
 
