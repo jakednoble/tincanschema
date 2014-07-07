@@ -1,12 +1,35 @@
+#!/usr/bin/env node
+
 var async = require('async');
-var schemaUtils = require('./schemaUtils.js');
 var fs = require('fs');
 
+var schemaUtils = require('./lib/schemaUtils.js');
+require('./lib/strUtils.js');
+
+
 var config = {
-    schema_name: 'tcapi:special',
-    //inFile: 'path/to/json/file'
+    schemaName: 'tcapi:special',
+    //srcFile: 'path/to/json/file'
     //schema: {schema: object}
+    //typeId: 'name_of_type'
 };
+function printHelp() {
+    console.log(
+        '\nvalidate.js -- ' +
+        'check the structure of a TinCan JSON file\n\n' +
+        "Requires, in the same directory as 'validate.js', a 'schema' \n" +
+        "folder containing TinCan schema in JSON format.\n"
+    );
+    printSyntax();
+}
+
+function printSyntax() {
+    var fname = process.argv[1].split('/').reverse()[0];
+    console.log(
+        "Syntax:\n" +
+        "    ./" + fname + " file.json [type_id]\n"
+    )
+}
 
 function checkArgs() {
     /* node validate.js file ...
@@ -15,12 +38,18 @@ function checkArgs() {
     // Chop ['node', 'validate.js']
     var rest = process.argv.slice(2);
 
-    if (rest.length === 0) throw new Error(
-        "No input file! Syntax:\n" +
-        "    " + process.argv.slice(0,2).join(' ') + " json_file\n"
-    );
+    if (rest[0] && (rest[0].startsWith('-h') || rest[0].startsWith('--h'))) {
+        printHelp();
+        process.exit(0);
+    }
 
-    config.inFile = rest[0];
+    if (rest.length === 0 || rest.length > 2) {
+        printSyntax();
+        throw new Error("Invalid arguments")
+    }
+
+    config.srcFile = rest[0];
+    config.typeId = rest[1];
 }
 
 function loadSchema(cb) {
@@ -28,7 +57,7 @@ function loadSchema(cb) {
         if (err) return cb(err);
         validateSchema(schema);
         config.schema = schema;
-        schemaUtils.addSchemaName(schema, config.schema_name);
+        schemaUtils.addSchemaName(schema, config.schemaName);
         cb();
     });
 }
@@ -73,7 +102,7 @@ function validateObjectWithRef(obj, ref) {
     var errors = schemaUtils.validate(obj, ref);
 
     if (errors === null) console.log(
-        'Validated as a  ' + ref['$ref'] + '  ...'
+        'VALID as a  ' + ref['$ref'] + '  ...'
     );
 
     return errors;
@@ -82,7 +111,7 @@ function validateObjectWithRef(obj, ref) {
 function validateObject(obj, id) {
     var ref;
     if (id) {
-        ref = {'$ref': config.schema_name + '#' + id};
+        ref = {'$ref': config.schemaName + '#' + id};
         return validateObjectWithRef(obj, ref);
     }
 
@@ -94,7 +123,7 @@ function validateObject(obj, id) {
     var results = [];
     var errors = {};
     for (id in config.schema.properties) {
-        ref = {'$ref': config.schema_name + '#' + id};
+        ref = {'$ref': config.schemaName + '#' + id};
         var err = validateObjectWithRef(obj, ref);
         if (err === null) results.push(id);
         else {
@@ -114,7 +143,7 @@ function validateJsonFile(fpath, id, cb) {
     /*
     cb called as cb(err) when done.
      */
-    console.log('Processing  ' + config.inFile + '  ...');
+    console.log('Processing  ' + config.srcFile + '  ...');
 
     loadJson(fpath, function(err, data) {
         if (err) return cb(err);
@@ -123,8 +152,8 @@ function validateJsonFile(fpath, id, cb) {
         if (errors) {
             delete errors.object;
 
-            var msg = "Could not validate the JSON file  " + fpath;
-            if (id) msg += "  as a " + config.schema_name + '#' + id;
+            var msg = "INVALID JSON file  " + fpath;
+            if (id) msg += "  as a " + config.schemaName + '#' + id;
             msg += '\n==== DATA ====\n' +
                 JSON.stringify(data, null, '    ') +
                 '\n==== END DATA ====\n' +
@@ -141,7 +170,7 @@ function init(cb) {
 }
 
 function work(cb) {
-    validateJsonFile(config.inFile, null, function(err) {
+    validateJsonFile(config.srcFile, config.typeId, function(err) {
         console.log('Done.');
         if (err) return cb(err);
         console.log('No errors!');
