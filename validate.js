@@ -7,8 +7,14 @@ var schemaUtils = require('./lib/schemaUtils.js');
 require('./lib/strUtils.js');
 
 
+function isArray(obj) {
+    return Object.prototype.toString.call(obj) === '[object Array]';
+}
+
+
 var config = {
     schemaName: 'tcapi:special',
+    verbose: false,
     //srcFile: 'path/to/json/file'
     //schema: {schema: object}
     //typeId: 'name_of_type'
@@ -120,6 +126,7 @@ function validateObject(obj, id) {
         ' (may take a while...)'
     );
 
+
     var results = [];
     var errors = {};
     for (id in config.schema.properties) {
@@ -143,30 +150,35 @@ function validateJsonFile(fpath, id, cb) {
     /*
     cb called as cb(err) when done.
      */
-    console.log('Processing  ' + config.srcFile + '  ...');
+    if (config.verbose) console.log('Processing  ' + config.srcFile + '  ...');
 
     loadJson(fpath, function(err, data) {
         if (err) return cb(err);
 
         var errors = validateObject(data, id);
+
         if (errors) {
-            var origMsg = errors.errors[0].message;
+            var origMsg = isArray(errors.errors) && errors.errors[0].message;
             if (origMsg && origMsg.startsWith('Unknown schema reference')) {
                 return cb(new Error(
-                    "Unknown schema type id '" + id + "'\n" +
-                    "See '" + __dirname + "/schema' for allowed type ids.\n"
+                    "UNKNOWN schema type id '" + id + "'\n" +
+                    "See '" + __dirname + "/schema' for allowed type ids."
                     ));
             }
 
-            delete errors.object;
+            var msg = "INVALID JSON file '" + fpath;
+            if (id) msg += "' as a " + config.schemaName + '#' + id;
 
-            var msg = "INVALID JSON file  " + fpath;
-            if (id) msg += "  as a " + config.schemaName + '#' + id;
-
-            msg += '\n==== DATA ====\n' +
-                JSON.stringify(data, null, '    ') +
-                '\n==== END DATA ====\n' +
-                JSON.stringify(errors, null, '    ');
+            if (config.verbose) {
+                if (isArray(errors.errors)){
+                    // msg += '\n==== DATA ====\n' +
+                    //     JSON.stringify(data, null, '    ') +
+                    //     '\n==== END DATA ====\n';
+                    msg += "\n" + JSON.stringify(errors.errors, null, '    ');
+                } else {
+                    msg += "\n" + JSON.stringify(errors, null, '    ');
+                }
+            }
             return cb(new Error(msg));
         }
         cb();
@@ -190,7 +202,15 @@ function main() {
         init,
         work,
     ], function(err) {
-        if (err) throw err;
+        if (!err) return;
+        if (
+            err.message.startsWith('INVALID') ||
+            err.message.startsWith('UNKNOWN')
+        ) {
+            console.log(err.message);
+            return;
+        }
+        throw err;
     });
 }
 
