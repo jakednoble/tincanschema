@@ -4,6 +4,11 @@ var schemaUtils = require('./lib/schemaUtils.js');
 require('./lib/strUtils.js');
 
 var cfg = {};
+function init() {
+    parseArgs();
+    schemaUtils.VERBOSE = true;
+}
+
 function printHelp() {
     console.log(
         '\njoinSchema.js -- ' +
@@ -49,7 +54,7 @@ function work() {
 }
 
 function main() {
-    parseArgs();
+    init();
     work();
 }
 
