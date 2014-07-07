@@ -185,15 +185,6 @@ function work(cb) {
     });
 }
 
-
-//TODO: validate length of mbox_sha1sum
-//TODO: language map keys -- really funky rules!
-//TODO: objectType hack for statement/substatement improvement?
-//TODO: duration validation
-//TODO: timestamp/stored validation
-//TODO: find out if there is a better way to handle the no additional agent properties thing
-//TODO: find out why minItems and maxItems aren't validating
-
 function main() {
     async.series([
         init,
