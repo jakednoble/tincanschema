@@ -150,10 +150,16 @@ function validateJsonFile(fpath, id, cb) {
 
         var errors = validateObject(data, id);
         if (errors) {
+            var origMsg = errors.errors[0].message;
+            if (origMsg && origMsg.startsWith('Unknown schema reference')) {
+                return cb(new Error("Unknown schema reference '" + id + "'"));
+            }
+
             delete errors.object;
 
             var msg = "INVALID JSON file  " + fpath;
             if (id) msg += "  as a " + config.schemaName + '#' + id;
+
             msg += '\n==== DATA ====\n' +
                 JSON.stringify(data, null, '    ') +
                 '\n==== END DATA ====\n' +
