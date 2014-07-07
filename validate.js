@@ -171,9 +171,7 @@ function init(cb) {
 
 function work(cb) {
     validateJsonFile(config.srcFile, config.typeId, function(err) {
-        console.log('Done.');
         if (err) return cb(err);
-        console.log('No errors!');
         cb();
     });
 }
