@@ -152,7 +152,10 @@ function validateJsonFile(fpath, id, cb) {
         if (errors) {
             var origMsg = errors.errors[0].message;
             if (origMsg && origMsg.startsWith('Unknown schema reference')) {
-                return cb(new Error("Unknown schema reference '" + id + "'"));
+                return cb(new Error(
+                    "Unknown schema type id '" + id + "'\n" +
+                    "See '" + __dirname + "/schema' for allowed type ids.\n"
+                    ));
             }
 
             delete errors.object;
