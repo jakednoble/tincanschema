@@ -1,0 +1,71 @@
+{
+    "id": "#activity",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "format": "uri",
+            "required": true
+        },
+        "objectType": {
+            "enum": [
+                "Activity"
+            ]
+        },
+        "definition": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "$ref": "#languagemap"
+                },
+                "description": {
+                    "$ref": "#languagemap"
+                },
+                "type": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "interactionType": {
+                    "enum": [
+                        "true-false",
+                        "choice",
+                        "fill-in",
+                        "long-fill-in",
+                        "matching",
+                        "performance",
+                        "sequencing",
+                        "likert",
+                        "numeric",
+                        "other"
+                    ]
+                },
+                "correctResponsesPattern": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "extensions": {
+                    "$ref": "#extensions"
+                }
+            },
+            "patternProperties": {
+                "^(choices|scale|source|target|steps)$": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "$ref": "#languagemap"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

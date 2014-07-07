@@ -1,0 +1,17 @@
+{
+    "id": "#mbox",
+    "type": "object",
+    "properties": {
+        "mbox": {
+            "required": true,
+            "type": "string",
+            "format": "uri",
+            "pattern": "^mailto:"
+        }
+    },
+    "patternProperties": {
+        "^(mbox_sha1sum|account|openid)$": {
+            "type": "null"
+        }
+    }
+}

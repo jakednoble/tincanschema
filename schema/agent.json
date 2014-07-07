@@ -1,0 +1,23 @@
+{
+    "id": "#agent",
+    "type": [
+        {
+            "$ref": "#inversefunctional"
+        }
+    ],
+    "properties": {
+        "name": {
+            "type": "string"
+        },
+        "objectType": {
+            "enum": [
+                "Agent"
+            ]
+        },
+        "mbox": {},
+        "mbox_sha1sum": {},
+        "account": {},
+        "openid": {}
+    },
+    "additionalProperties": false
+}

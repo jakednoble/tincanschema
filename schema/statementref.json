@@ -1,0 +1,21 @@
+{
+    "id": "#statementref",
+    "type": "object",
+    "properties": {
+        "objectType": {
+            "enum": [
+                "StatementRef"
+            ],
+            "required": true
+        },
+        "id": {
+            "type": [
+                {
+                    "$ref": "#uuid"
+                }
+            ],
+            "required": true
+        }
+    },
+    "additionalProperties": false
+}

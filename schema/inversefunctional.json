@@ -1,0 +1,17 @@
+{
+    "id": "#inversefunctional",
+    "type": [
+        {
+            "$ref": "#mbox"
+        },
+        {
+            "$ref": "#mbox_sha1sum"
+        },
+        {
+            "$ref": "#account"
+        },
+        {
+            "$ref": "#openid"
+        }
+    ]
+}

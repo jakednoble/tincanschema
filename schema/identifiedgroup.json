@@ -1,0 +1,16 @@
+{
+    "id": "#identifiedgroup",
+    "extends": {
+        "$ref": "#inversefunctional"
+    },
+    "properties": {
+        "name": {},
+        "objectType": {},
+        "member": {},
+        "mbox": {},
+        "mbox_sha1sum": {},
+        "account": {},
+        "openid": {}
+    },
+    "additionalProperties": false
+}

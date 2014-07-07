@@ -1,0 +1,21 @@
+{
+    "id": "#groupBasics",
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string"
+        },
+        "objectType": {
+            "enum": [
+                "Group"
+            ],
+            "required": true
+        },
+        "member": {
+            "type": "array",
+            "items": {
+                "$ref": "#agent"
+            }
+        }
+    }
+}

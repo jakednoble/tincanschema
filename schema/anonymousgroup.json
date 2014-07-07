@@ -1,0 +1,11 @@
+{
+    "id": "#anonymousgroup",
+    "properties": {
+        "member": {
+            "required": true
+        },
+        "name": {},
+        "objectType": {}
+    },
+    "additionalProperties": false
+}

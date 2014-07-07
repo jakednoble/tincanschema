@@ -1,0 +1,27 @@
+{
+    "id": "#account",
+    "type": "object",
+    "properties": {
+        "account": {
+            "required": true,
+            "type": "object",
+            "properties": {
+                "homePage": {
+                    "type": "string",
+                    "format": "uri",
+                    "required": true
+                },
+                "name": {
+                    "type": "string",
+                    "required": true
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "patternProperties": {
+        "^(mbox_sha1sum|mbox|openid)$": {
+            "type": "null"
+        }
+    }
+}

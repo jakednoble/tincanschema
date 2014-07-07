@@ -1,0 +1,34 @@
+{
+    "id": "#substatement",
+    "type": [
+        {
+            "$ref": "#statement"
+        }
+    ],
+    "properties": {
+        "objectType": {
+            "enum": [
+                "SubStatement"
+            ],
+            "required": true
+        },
+        "object": {
+            "disallow": [
+                {
+                    "properties": {
+                        "objectType": {
+                            "enum": [
+                                "SubStatement"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "patternProperties": {
+        "^(id|stored|authority|voided)$": {
+            "type": "null"
+        }
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "id": "#openid",
+    "type": "object",
+    "properties": {
+        "openid": {
+            "required": true,
+            "type": "string",
+            "format": "uri"
+        }
+    },
+    "patternProperties": {
+        "^(mbox_sha1sum|account|mbox)$": {
+            "type": "null"
+        }
+    }
+}

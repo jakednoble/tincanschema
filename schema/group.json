@@ -1,0 +1,14 @@
+{
+    "id": "#group",
+    "extends": {
+        "$ref": "#groupBasics"
+    },
+    "type": [
+        {
+            "$ref": "#anonymousgroup"
+        },
+        {
+            "$ref": "#identifiedgroup"
+        }
+    ]
+}

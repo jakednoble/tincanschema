@@ -1,0 +1,15 @@
+{
+    "id": "#mbox_sha1sum",
+    "type": "object",
+    "properties": {
+        "mbox_sha1sum": {
+            "required": true,
+            "type": "string"
+        }
+    },
+    "patternProperties": {
+        "^(mbox|account|openid)$": {
+            "type": "null"
+        }
+    }
+}

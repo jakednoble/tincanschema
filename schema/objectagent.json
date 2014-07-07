@@ -1,0 +1,13 @@
+{
+    "id": "#objectagent",
+    "type": [
+        {
+            "$ref": "#agent"
+        }
+    ],
+    "properties": {
+        "objectType": {
+            "required": true
+        }
+    }
+}
